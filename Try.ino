@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h>
+
 // PIN DEFINITIONS
 const int motorIN1 = 7;
 const int motorIN2 = 6;
@@ -12,9 +14,8 @@ const int echoPin = 11;
 const long STOP_DIST_CM = 10;
 
 void setup() {
-  Serial.begin(9600); // ← ADDED
+  Serial.begin(9600);
 
-  // Motor pins
   pinMode(motorIN1, OUTPUT);
   pinMode(motorIN2, OUTPUT);
   pinMode(motorIN3, OUTPUT);
@@ -22,13 +23,19 @@ void setup() {
   pinMode(motorEN1, OUTPUT);
   pinMode(motorEN2, OUTPUT);
 
-  // Sensor pins ← ADDED
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
 
 void loop() {
   long dist = readUltrasonicCM();
+
+  if (dist == -1) {
+    Serial.println("No reading, skipping...");
+    delay(60); // ← settle time before next ping
+    return;    // ← skip the rest, don't trigger motors on a bad read
+  }
+
   Serial.print("Dist: "); Serial.println(dist);
 
   if (dist > 0 && dist <= STOP_DIST_CM) {
@@ -56,6 +63,8 @@ void loop() {
     analogWrite(motorEN2, 0);
     delay(2000);
   }
+
+  delay(60); // ← settle time between normal pings
 }
 
 // --- ULTRASONIC HELPER ---
