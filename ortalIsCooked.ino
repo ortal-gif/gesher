@@ -7,10 +7,6 @@ const int SERVO_PIN = 2;
 const int BOAT_TRIG = 12;
 const int BOAT_ECHO = 11;
 
-// Car ultrasonic
-const int CAR_TRIG = A1;
-const int CAR_ECHO = A2;
-
 // Motor driver
 const int IN1 = 7;
 const int IN2 = 6;
@@ -26,7 +22,6 @@ const int BUZZER = A0;
 
 // ---------- SETTINGS ----------
 const int BOAT_DISTANCE = 25;
-const int CAR_DISTANCE = 15;
 
 const int MOTOR_SPEED = 100;
 
@@ -44,9 +39,6 @@ void setup() {
   pinMode(BOAT_TRIG, OUTPUT);
   pinMode(BOAT_ECHO, INPUT);
 
-  pinMode(CAR_TRIG, OUTPUT);
-  pinMode(CAR_ECHO, INPUT);
-
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
@@ -62,22 +54,15 @@ void setup() {
 
   stopMotor();
   normalMode();
-  
-  //turn lights on on setup
- // digitalWrite(GREEN_LED, HIGH);
- // digitalWrite(RED_LED, LOW);
 
   Serial.println("Drawbridge started");
 }
 
 void loop() {
   long boat = readUltrasonicCM(BOAT_TRIG, BOAT_ECHO);
-  long car = readUltrasonicCM(CAR_TRIG, CAR_ECHO);
 
   Serial.print("Boat: ");
   Serial.print(boat);
-  Serial.print(" cm | Car: ");
-  Serial.print(car);
   Serial.println(" cm");
 
   if (boat > 0 && boat <= BOAT_DISTANCE) {
@@ -90,7 +75,6 @@ void loop() {
 void boatDetectedSequence() {
   Serial.println("Boat detected!");
 
-
   digitalWrite(GREEN_LED, LOW);
   digitalWrite(RED_LED, HIGH);
 
@@ -99,21 +83,7 @@ void boatDetectedSequence() {
   barrier.write(BARRIER_CLOSED);
   delay(1000);
 
-  while (true) {
-    long car = readUltrasonicCM(CAR_TRIG, CAR_ECHO);
-
-    Serial.print("Checking car: ");
-    Serial.println(car);
-
-    if (car == -1 || car > CAR_DISTANCE) {
-      break;
-    }
-
-    warningBeep();
-    delay(500);
-  }
-
-  Serial.println("No car. Opening bridge.");
+  Serial.println("Opening bridge.");
 
   openBridge();
   delay(OPEN_TIME);
@@ -141,7 +111,6 @@ void boatDetectedSequence() {
   delay(CLOSE_TIME);
   stopMotor();
 
-  // Bridge is now closed
   digitalWrite(RED_LED, LOW);
   digitalWrite(GREEN_LED, HIGH);
 
@@ -176,19 +145,17 @@ long readUltrasonicCM(int trigPin, int echoPin) {
 }
 
 void openBridge() {
-  // Motor A one way, Motor B opposite way
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
 
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
 
-  analogWrite(ENA, MOTOR_SPEED);
+  analogWrite(ENA, MOTOR_SPEED + 20);
   digitalWrite(ENB, HIGH);
 }
 
 void closeBridge() {
-  // Reverse both from openBridge
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
 
@@ -210,11 +177,11 @@ void stopMotor() {
 }
 
 void warningBeep() {
-  tone(BUZZER, 1000, 200);
+  tone(BUZZER, 4000, 200);
 }
 
 void successBeep() {
-  tone(BUZZER, 500, 150);
+  tone(BUZZER, 3500, 150);
   delay(200);
-  tone(BUZZER, 800, 150);
+  tone(BUZZER, 3000, 150);
 }
