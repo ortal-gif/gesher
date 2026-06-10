@@ -64,8 +64,8 @@ void setup() {
   normalMode();
   
   //turn lights on on setup
-  digitalWrite(GREEN_LED, HIGH);
-  digitalWrite(RED_LED, LOW);
+ // digitalWrite(GREEN_LED, HIGH);
+ // digitalWrite(RED_LED, LOW);
 
   Serial.println("Drawbridge started");
 }
